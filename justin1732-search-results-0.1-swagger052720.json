@@ -1,0 +1,680 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Search Results",
+    "description" : "Search Results",
+    "version" : "0.1"
+  },
+  "servers" : [ {
+    "url" : "https://{siteId}.a.searchspring.io/api/",
+    "variables" : {
+      "siteId" : {
+        "default" : "foobar",
+        "description" : "Site ID for your Searchspring account"
+      }
+    }
+  } ],
+  "paths" : {
+    "/search/search.json" : {
+      "get" : {
+        "description" : "Get site results.",
+        "parameters" : [ {
+          "name" : "searchspring-session-id",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : false,
+          "description" : "This string is the ID for the session. If the cookie 'ssSessionIdNamespace' is currently set, we recommend using that. If that cookie does not exist yet, be sure to generate a new ID whenever a new web session begins. We recommend using a UUID v4 generator. Be sure to set it as the cookie 'ssSessionIdNamespace'.",
+          "example" : "6576ccfc-1294-4e30-878a-77cc2ca5299f"
+        }, {
+          "name" : "searchspring-user-id",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : false,
+          "description" : "This string is an ID for the user. If the cookie 'ssUserId' is currently set, we recommend using that. If that cookie does not exist yet, be sure to generate a new ID for this user. We recommend using a UUID v4 generator. Be sure to set it as the cookie 'ssUserId'. TIP: This will override the userId parameter (see below).",
+          "example" : "3022b347-a272-46c3-b676-62266e335a80"
+        }, {
+          "name" : "searchspring-page-load-id",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : false,
+          "description" : "This string creates a new ID for this on every page load. We recommend using a UUID v4 generator. This value is not stored in any cookies or local storage.",
+          "example" : "945ea9d2-f155-4cf1-81f5-f7c60b3ce0db"
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "dress",
+          "required" : true,
+          "description" : "This string is the query parameter. This string tells the API to start searching."
+        }, {
+          "name" : "tag",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "black-friday",
+          "description" : "This string is the landing page tag. This searches the database for products that are part of that landing page. This will be blank or not included for non-landing page pages."
+        }, {
+          "name" : "domain",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "description" : "This string is for the domain, which is the full URL of the current page. This must be passed in order for the Category Insights report to fully function."
+        }, {
+          "name" : "resultsFormat",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "default" : "html"
+          },
+          "example" : "native",
+          "required" : true,
+          "description" : "This string represents the results formatting. This accepts 'native' or 'html'. 'Native' will return raw JSON for products. 'HTML' will generate HTML for your products based on SearchSpring templates."
+        }, {
+          "name" : "siteId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "scmq7n",
+          "required" : true,
+          "description" : "This string represents the siteId that identifies your site. You can find your siteId on the 'My Account' page."
+        }, {
+          "name" : "redirectResponse",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "default" : "minimal",
+            "enum" : [ "minimal", "direct", "full" ]
+          },
+          "required" : false,
+          "description" : "This string changes how redirects behave in the response. This response currently accepts 'direct' redirects (these return a 302 redirect response immediately, which is great for API integrations and slightly faster than minimal), 'minimal' redirects (these redirects are the default value. These redirects do not gather or return product results. Other redirects placed in 'merchandising key' below will behave as usual), and 'full' redirects (these redirects return the full product results in addition to redirect information. As a result these redirects are much slower). "
+        }, {
+          "name" : "userId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : false,
+          "description" : "NOTE: This is a legacy feature. This string represents the user ID. This is to support legacy integrations, and it is the same as the searchspring-user-id header above. If you have both of them, the header above will take precedence. For a non-logged in user, this can be a randomly generated ID stored in a cookie.",
+          "example" : "3022b347-a272-46c3-b676-62266e335a80"
+        }, {
+          "name" : "Filtering Results",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/ResultFilter"
+          },
+          "required" : false,
+          "example" : "filter.brand=Nike",
+          "description" : "This string filters search results on a field for a given value. It si possible to specify multiple filters in a single request. In terms of structure, use normal filters (filter) for customer-selected filters (like color) and background filters (bgfilter) for non-customer-selected filters (like pre-filtered category pages)."
+        }, {
+          "name" : "Range Filters",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/RangeFilter"
+          },
+          "required" : false,
+          "example" : "filter.price.high=50",
+          "description" : "This string filters the search result on a field for a range of values. This must be used on a numeric field."
+        }, {
+          "name" : "rq",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : false,
+          "description" : "This string is for 'Refine Query'. This query searches the search database again. For example, when you want to allow customers to search within a search result to refine it.",
+          "example" : "shoes"
+        }, {
+          "name" : "Sorting",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/Sort"
+          },
+          "required" : false,
+          "description" : "This string sorts search results based on specific field in a specified direction. This is set up to sort the results by relevancy.",
+          "example" : "sort.name=asc"
+        }, {
+          "name" : "Pagination",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "default" : 1
+          },
+          "required" : false,
+          "description" : "This string paginates results to the given value."
+        }, {
+          "name" : "resultsPerPage",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "default" : 30
+          },
+          "required" : false,
+          "description" : "This is the string for 'Results per page'. This string limits the number of results per page to the given value. The accepted range for this query is 1 to 100.",
+          "example" : "20"
+        }, {
+          "name" : "callback",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : false,
+          "description" : "This is the string for the JSONP callback. This string is used for JSONP requests. When a callback function is specified, the Searchspring API will pass the JSON-encoded response as an argument to the function specified.",
+          "example" : "mycallback"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful request.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SearchAPIResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Error. Please check headers and queries."
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Sort" : {
+        "type" : "string",
+        "required" : [ "sort" ],
+        "properties" : {
+          "sort.[field]" : {
+            "type" : "string",
+            "enum" : [ "asc", "desc" ]
+          }
+        }
+      },
+      "ResultFilter" : {
+        "type" : "string",
+        "properties" : {
+          "filter.[field_name]" : {
+            "type" : "string"
+          },
+          "=[value]" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RangeFilter" : {
+        "type" : "string",
+        "required" : [ "filter" ],
+        "properties" : {
+          "filter.[field]." : {
+            "type" : "string",
+            "enum" : [ "low", "high" ]
+          },
+          "=[value]" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "FacetTypes" : {
+        "type" : "object",
+        "required" : [ "type" ],
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "example" : "value, range",
+            "description" : "This string shows the facet value type. The possible facet value types are value or range."
+          }
+        },
+        "discriminator" : {
+          "propertyName" : "type"
+        }
+      },
+      "value" : {
+        "allOf" : [ {
+          "type" : "object",
+          "properties" : {
+            "active" : {
+              "type" : "integer",
+              "example" : "1",
+              "description" : "This integer shows whether or not the current facet is selected for filters. '1' means the current facet is active."
+            },
+            "type" : {
+              "type" : "string",
+              "example" : "value",
+              "description" : "This string shows the facet value type. The possible facet value types are value or range.",
+              "enum" : [ "value", "range" ]
+            },
+            "value" : {
+              "type" : "string",
+              "example" : "red",
+              "description" : "This string is the value to filter by for the current facet option. This string is used when type=value."
+            },
+            "label" : {
+              "type" : "string",
+              "example" : "blue",
+              "description" : "This string shows the label for the current facet option. This is used when type=value."
+            },
+            "count" : {
+              "type" : "integer",
+              "example" : "1140",
+              "description" : "This integer represents the number of results that match the current facet option."
+            }
+          }
+        } ]
+      },
+      "range" : {
+        "allOf" : [ {
+          "type" : "object",
+          "properties" : {
+            "active" : {
+              "type" : "integer",
+              "example" : "1",
+              "description" : "This integer shows whether or not the current facet is selected for filters. '1' means the current facet is active."
+            },
+            "type" : {
+              "type" : "string",
+              "example" : "value",
+              "description" : "This string shows the facet value type. The possible facet value types are value or range.",
+              "enum" : [ "value", "range" ]
+            },
+            "low" : {
+              "type" : "integer",
+              "example" : "20",
+              "description" : "This integer represents the lower-bound value for the current facet option. This integer is used when type=range."
+            },
+            "high" : {
+              "type" : "integer",
+              "example" : "400",
+              "description" : "This integer represents the higher-bound value for the current facet option. This integer is used when type=range."
+            },
+            "count" : {
+              "type" : "integer",
+              "example" : "1140",
+              "description" : "This integer represents the number of results that match the current facet option."
+            }
+          }
+        } ]
+      },
+      "FacetVR" : {
+        "type" : "object",
+        "properties" : {
+          "range" : {
+            "type" : "object",
+            "$ref" : "#/components/schemas/range"
+          },
+          "value" : {
+            "type" : "object",
+            "$ref" : "#/components/schemas/value"
+          }
+        },
+        "discriminator" : {
+          "propertyName" : "type"
+        }
+      },
+      "SearchAPIResponse" : {
+        "type" : "object",
+        "properties" : {
+          "pagination" : {
+            "type" : "object",
+            "description" : "This object shows all the pagination data.",
+            "properties" : {
+              "totalResults" : {
+                "description" : "This integer shows the total number of results returned by the search result.",
+                "type" : "integer",
+                "example" : "1375"
+              },
+              "begin" : {
+                "description" : "This integer is the starting index of the first product in the result. This integer starts with '1'.",
+                "type" : "integer",
+                "example" : "1"
+              },
+              "end" : {
+                "description" : "This integer is the ending index of the last product in the result.",
+                "type" : "integer",
+                "example" : "24"
+              },
+              "currentPage" : {
+                "description" : "This integer is the page number of the current results.",
+                "type" : "integer",
+                "example" : "1"
+              },
+              "totalPages" : {
+                "description" : "This integer is the total number of pages available for the current result set.",
+                "type" : "integer",
+                "example" : "58"
+              },
+              "previousPage" : {
+                "description" : "This integer is the page number of the previous page.",
+                "type" : "integer",
+                "example" : "0"
+              },
+              "nextPage" : {
+                "description" : "This integer is the page number of the next page.",
+                "type" : "integer",
+                "example" : "2"
+              },
+              "perPage" : {
+                "description" : "This integer is the current selected option for the number of results per page.",
+                "type" : "integer",
+                "example" : "24"
+              },
+              "defaultPerPage" : {
+                "description" : "This integer is the default client value for the number of results per page.",
+                "type" : "integer",
+                "example" : "24"
+              }
+            }
+          },
+          "sorting" : {
+            "type" : "object",
+            "description" : "This object gets all the sorting data.",
+            "properties" : {
+              "options" : {
+                "type" : "array",
+                "items" : {
+                  "properties" : {
+                    "field" : {
+                      "type" : "string",
+                      "description" : "This string is the field name for the sorting option."
+                    },
+                    "direction" : {
+                      "description" : "This string indicates the direction for the sorting option.",
+                      "type" : "string",
+                      "example" : "desc"
+                    },
+                    "label" : {
+                      "description" : "This string shows the configured label for the sorting option.",
+                      "type" : "string",
+                      "example" : "Best Match"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "resultsLayout" : {
+            "type" : "string",
+            "description" : "This string shows the current result layout",
+            "example" : "grid",
+            "enum" : [ "list", "grid", "palette", "hierarchy", "slider" ]
+          },
+          "results" : {
+            "type" : "array",
+            "description" : "This is an array that gets all the results data.",
+            "items" : {
+              "properties" : {
+                "field" : {
+                  "description" : "This array is the value of the current result for the given field.",
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "children" : {
+                  "description" : "This is an array of child objects. Each object contains its own list of fields with values.",
+                  "type" : "array",
+                  "items" : {
+                    "properties" : {
+                      "field" : {
+                        "type" : "string",
+                        "description" : "This string is the value for the current child for the given variant field."
+                      },
+                      "facet_match" : {
+                        "type" : "boolean",
+                        "description" : "This boolean shows whether or not this child is applicable for all currently applied filters. This is only returned if filters are present."
+                      },
+                      "search_match" : {
+                        "type" : "boolean",
+                        "description" : "This boolean shows whether or not all search query terms were found in this child. This is only returned if a search query is present."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "facets" : {
+            "type" : "array",
+            "description" : "This is an array of objects representing the available facets for the current search results.",
+            "items" : {
+              "properties" : {
+                "field" : {
+                  "type" : "string",
+                  "example" : "color_family",
+                  "description" : "This string is the field name for the facet."
+                },
+                "label" : {
+                  "type" : "string",
+                  "example" : "Color",
+                  "description" : "This string is the configured label for the field."
+                },
+                "type" : {
+                  "type" : "string",
+                  "example" : "palette",
+                  "description" : "This string shows the type of facet. Possible values are list, grid, palette, hierarchy, and slider.",
+                  "enum" : [ "list", "grid", "palette", "hierarchy", "slider" ]
+                },
+                "multiple" : {
+                  "type" : "string",
+                  "example" : "multiple-union",
+                  "description" : "This string is the configured multiple setting for the facet. This determines how the facet is handled when multiple facet options are selected for filtering. The possible values for this string are multiple-union or multiple-intersect."
+                },
+                "collapse" : {
+                  "type" : "integer",
+                  "example" : "1",
+                  "default" : "0",
+                  "description" : "This integer shows how many facets are currently collapsed."
+                },
+                "facet_active" : {
+                  "type" : "integer",
+                  "example" : "1",
+                  "default" : "0",
+                  "description" : "This integer shows how many facets are currently active."
+                },
+                "value" : {
+                  "description" : "This is an array of objects representing the facet option values.",
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FacetVR"
+                  }
+                }
+              }
+            }
+          },
+          "breadcrumbs" : {
+            "type" : "array",
+            "description" : "This is an array of objects representing breadcrumbs for the current search result.",
+            "items" : {
+              "properties" : {
+                "label" : {
+                  "type" : "string",
+                  "description" : "This is string is the label for the current breadcrumb with both field an value.",
+                  "example" : "Search: \"dress\""
+                },
+                "filterLabel" : {
+                  "type" : "string",
+                  "description" : "This string is the label for the current breadcrumb with just the filter field label.",
+                  "example" : "Search"
+                },
+                "filterValue" : {
+                  "type" : "string",
+                  "description" : "This string is the label for the current breadcrumb with just the filter value.",
+                  "example" : "dress"
+                },
+                "removeFilters" : {
+                  "type" : "array",
+                  "description" : "This is an array of objects representing the filters that should be removed when the current breadcrumb is clicked.",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "removeRefineQuery" : {
+                  "type" : "array",
+                  "description" : "This is an array of 'refine queries' (see above at 'rq') that should be removed when the current breadcrumb is clicked.",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "filterSummary" : {
+            "type" : "array",
+            "description" : "This is an array of objects representing the currently selected filters for the current search result. This array is useful when you want to build a list of currently selected filters to display the above facets.",
+            "items" : {
+              "properties" : {
+                "field" : {
+                  "type" : "string",
+                  "description" : "This is string is the field for the current filter."
+                },
+                "value" : {
+                  "type" : "string",
+                  "description" : "This string is the value for the current filter."
+                },
+                "label" : {
+                  "type" : "string",
+                  "description" : "This string is the label to display for the current filter. This string includes both the field and value labels."
+                },
+                "filterLabel" : {
+                  "type" : "string",
+                  "description" : "This string is the label to display for the current filter. This string only includes the value label."
+                }
+              }
+            }
+          },
+          "merchandising" : {
+            "type" : "object",
+            "description" : "This is object that represents the configured merchandising campaigns for the current search result.",
+            "properties" : {
+              "redirect" : {
+                "type" : "string",
+                "description" : "This string represents the redirect URL that is associated with the current search query."
+              },
+              "elevated" : {
+                "type" : "array",
+                "description" : "This is an array of Searchspring IDs of products that were elevated by current merchandising campaign. This is for Searchspring debug use only.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "is_elevated" : {
+                "type" : "array",
+                "description" : "This is an array of Searchspring IDs of products that were elevated by Intellisuggest. This is for Searchspring debug use only.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "removed" : {
+                "type" : "array",
+                "description" : "This is an array of Searchspring IDs of that were removed by the current merchandising campaign. This is for Searchspring debug use only.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "content" : {
+                "type" : "object",
+                "properties" : {
+                  "position" : {
+                    "type" : "array",
+                    "description" : "This array shows the HTML content to display the merchandising campaign for the current search result. The possible positions are 'banner', 'header', 'left', 'footer', and 'inline'.",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "inline" : {
+                    "type" : "array",
+                    "description" : "This is an array for Inline Control Objects. There is a maximum of 4 Inline Control Objects.",
+                    "items" : {
+                      "properties" : {
+                        "config" : {
+                          "type" : "object",
+                          "description" : "This object shows the position where the banner content should appear within the product grid. This is a zero-based index.",
+                          "properties" : {
+                            "position" : {
+                              "type" : "object",
+                              "properties" : {
+                                "index" : {
+                                  "type" : "integer"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "value" : {
+                          "type" : "string",
+                          "description" : "This string is where HTML content should be displayed."
+                        }
+                      }
+                    }
+                  }
+                },
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "experiments" : {
+                "type" : "array",
+                "description" : "This is an array of experiment objects.",
+                "items" : {
+                  "properties" : {
+                    "campaignId" : {
+                      "type" : "string",
+                      "description" : "This string represents the ID of the specific campaign configuration being used for the current variation."
+                    },
+                    "experimentId" : {
+                      "type" : "string",
+                      "description" : "This string represents the ID of the experiment currently affecting this response."
+                    },
+                    "parentCampaignId" : {
+                      "type" : "string",
+                      "description" : "This string represents the ID of the campaign on which this experiment is being run."
+                    },
+                    "variationId" : {
+                      "type" : "string",
+                      "description" : "This string represents the ID of the variation being run within this experiment. This string is uniquely tied to the campaignId."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "query" : {
+            "type" : "string",
+            "description" : "This string is for additional query information.",
+            "properties" : {
+              "matchType" : {
+                "type" : "string",
+                "description" : "This string indicates the type of search matching that was required for this search. This string will return 'Expanded' when an Expanded Search is applied after finding zero results for the initial strict search."
+              }
+            }
+          },
+          "didYouMean" : {
+            "type" : "object",
+            "description" : "This is an object representing a spelling suggestion for the current search results. Only included for results with no results.",
+            "properties" : {
+              "query" : {
+                "type" : "string",
+                "description" : "This string is the suggested query after the spelling correction."
+              },
+              "highlighted" : {
+                "type" : "string",
+                "description" : "This string is the suggested query after the spelling correction highlighted by being wrapped in em elements."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
